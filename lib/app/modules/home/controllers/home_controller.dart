@@ -19,16 +19,24 @@ class HomeController extends GetxController {
     if (name != '') {
       final date = DateTime.now().toIso8601String();
 
-      final product = Product(id: date, name: name, createdAt: date);
-      products.add(product);
-      Get.back();
+      ProductProvider().postProduct(name, date).then((response) {
+        final product = Product(
+          id: response['name'],
+          name: name,
+          createdAt: date,
+        );
+        products.add(product);
+        Get.back();
+      });
     } else {
       dialogError('Masukkan produk terlebih dahulu');
     }
   }
 
   void delete(String id) {
-    products.removeWhere((element) => element.id == id);
+    ProductProvider()
+        .deleteProduct(id)
+        .then((value) => products.removeWhere((element) => element.id == id));
   }
 
   Product findById(String id) {
@@ -36,10 +44,11 @@ class HomeController extends GetxController {
   }
 
   void edit(String id, String name) {
-    // final product = products.firstWhere((element) => element.id == id);
-    final product = findById(id);
-    product.name = name;
-    products.refresh();
-    Get.back();
+    ProductProvider().editProduct(id, name).then((_) {
+      final product = findById(id);
+      product.name = name;
+      products.refresh();
+      Get.back();
+    });
   }
 }
